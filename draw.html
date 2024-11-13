@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽奖小网页</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .table-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #all-results {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .result-item {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="table-container">
+        <h2>奖品列表</h2>
+        <table style="margin: auto; width: 100%;">
+            <thead>
+                <tr>
+                    <th>奖品</th>
+                    <th>概率</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>一等奖: iPhone 15</td>
+                    <td>5%</td>
+                </tr>
+                <tr>
+                    <td>二等奖: iPad Pro</td>
+                    <td>10%</td>
+                </tr>
+                <tr>
+                    <td>三等奖: 100元购物卡</td>
+                    <td>20%</td>
+                </tr>
+                <tr>
+                    <td>四等奖: 50元购物卡</td>
+                    <td>25%</td>
+                </tr>
+                <tr>
+                    <td>谢谢参与</td>
+                    <td>40%</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <input type="text" id="secret-key" placeholder="请输入秘钥" />
+        <button id="draw-btn">开始抽奖</button>
+        
+        <div id="result"></div>
+        <h3>抽奖结果</h3>
+        <div id="all-results"></div>
+    </div>
+
+    <script>
+        document.getElementById('draw-btn').addEventListener('click', () => {
+            const secretKey = document.getElementById('secret-key').value;
+
+            fetch('/draw', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: secretKey })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.results) {
+                    const allResultsContainer = document.getElementById('all-results');
+                    allResultsContainer.innerHTML = ''; // 清空之前的结果
+
+                    data.results.forEach(result => {
+                        const timeStamp = new Date(result.time).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+                        const resultItem = document.createElement('div');
+                        resultItem.classList.add('result-item');
+                        resultItem.textContent = `${timeStamp} - 中奖：${result.prize}`;
+                        allResultsContainer.appendChild(resultItem);
+                    });
+
+                    document.getElementById('result').textContent = '抽奖完成，请查看结果。';
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html>
