@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秘钥生成工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .key-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #generated-key {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="key-container">
+        <h2>秘钥生成工具</h2>
+        <input type="number" id="usage-count" placeholder="输入可用次数" min="1" value="1">
+        <button id="generate-key-btn">生成秘钥</button>
+        <div id="generated-key"></div>
+    </div>
+
+    <script>
+        document.getElementById('generate-key-btn').addEventListener('click', () => {
+            const count = document.getElementById('usage-count').value;
+
+            fetch('/generate_key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ usage_count: count })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.key) {
+                    document.getElementById('generated-key').textContent = `生成的秘钥: ${data.key} (可用次数: ${data.usage_count})`;
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html>
+
